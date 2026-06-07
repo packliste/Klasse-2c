@@ -2,15 +2,25 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klassenkasse 2c - Schuljahr 2025/26 (V6 - Repariert)</title>   
+    <!-- WICHTIG: Erwirkt die korrekte Skalierung auf JEDEM Smartphone -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Erzwingt den Vollbild-App-Modus auf iOS (Safari) und Android -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <title>Klassenkasse 2c</title>   
+    
+    <!-- Anti-Cache-Befehle -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <link rel="manifest" href="manifest.json?v=3">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js?v=3"></script>
+    <!-- DATA-URI MANIFEST: Lädt das Manifest DIREKT aus dem Code, benötigt keine extra Datei mehr! -->
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Klassenkasse%202c%22%2C%22short_name%22%3A%22Kasse%202c%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f6f9%22%2C%22theme_color%22%3A%22%234a90e2%22%7D">
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -332,92 +342,11 @@
             text-align: center;
         }
 
-        /* PRINT OPTIMIERUNG FÜR DEN PDF-EXPORT */
+        /* Print-Optimierung */
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 15mm;
-            }
-            
-            body {
-                background: white !important;
-                color: #000000 !important;
-                padding: 0 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            header {
-                box-shadow: none !important;
-                border-bottom: 2px solid #333 !important;
-                border-radius: 0 !important;
-                padding-bottom: 10px !important;
-                margin-bottom: 25px !important;
-            }
-
-            .dashboard {
-                display: flex !important;
-                flex-direction: row !important;
-                justify-content: space-between !important;
-                gap: 15px !important;
-                margin-bottom: 30px !important;
-            }
-
-            .card {
-                flex: 1 !important;
-                float: none !important;
-                width: auto !important;
-                background: #f8fafc !important;
-                border: 1px solid #cbd5e1 !important;
-                border-left: 6px solid var(--primary) !important;
-                border-radius: 8px !important;
-                box-shadow: none !important;
-                padding: 12px !important;
-            }
-            
-            .card.balance { border-left-color: var(--primary) !important; }
-            .card.income { border-left-color: var(--success) !important; }
-            .card.expense { border-left-color: var(--danger) !important; }
-
-            .card h3 {
-                font-size: 0.8rem !important;
-                color: #475569 !important;
-            }
-
-            .card .amount {
-                font-size: 1.4rem !important;
-            }
-
-            .form-container, .backup-container, .action-buttons, .btn-success, .tx-meta + .tx-details::before {
-                display: none !important;
-            }
-
-            .transactions-container {
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
-
-            .transactions-container h2 {
-                font-size: 1.2rem !important;
-                border-bottom: 1px solid #64748b !important;
-                padding-bottom: 5px !important;
-                margin-bottom: 15px !important;
-            }
-
-            .transaction-item {
-                border-bottom: 1px solid #cbd5e1 !important;
-                padding: 8px 0 !important;
-                page-break-inside: avoid;
-            }
-
-            .tx-title {
-                font-size: 0.95rem !important;
-            }
-
-            .tx-amount {
-                margin-right: 0 !important;
-                font-size: 1rem !important;
-            }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .form-container, .backup-container, .action-buttons, .btn-success { display: none !important; }
+            .transaction-item { border-bottom: 1px solid #cbd5e1 !important; }
         }
     </style>
 </head>
@@ -428,6 +357,7 @@
         <p>Schuljahr 2025/2026 – Mobile Verwaltung</p>
     </header>
 
+    <!-- Dashboard -->
     <div class="dashboard">
         <div class="card balance">
             <h3>Aktueller Bestand</h3>
@@ -443,6 +373,7 @@
         </div>
     </div>
 
+    <!-- Formular -->
     <div class="form-container" id="form-container">
         <h2 id="form-title">Neue Buchung hinzufügen</h2>
         <div class="edit-indicator" id="edit-indicator">⚠️ Du bearbeitest gerade einen Eintrag!</div>
@@ -468,7 +399,7 @@
                     <input type="number" id="quantity" value="1" min="1">
                 </div>
                 <div class="form-group">
-                    <label for="price">Einzelpreis in € (ohne Vorzeichen)</label>
+                    <label for="price">Einzelpreis in €</label>
                     <input type="number" id="price" step="0.01" placeholder="z.B. 5.50" min="0.01" required>
                 </div>
             </div>
@@ -477,12 +408,13 @@
         </form>
     </div>
 
+    <!-- Transaktionen -->
     <div class="transactions-container">
-        <h2>Buchungshistorie (Neueste oben)</h2>
-        <ul class="transaction-list" id="transaction-list">
-            </ul>
+        <h2>Buchungshistorie</h2>
+        <ul class="transaction-list" id="transaction-list"></ul>
     </div>
 
+    <!-- Datensicherung -->
     <div class="backup-container">
         <h2>Backup & Datensicherung</h2>
         <div class="backup-grid">
@@ -498,7 +430,6 @@
     </div>
 
     <script>
-        // Deine Originaldaten (dienen nur noch als Fallback, falls im Speicher gar nichts liegt)
         const defaultTransactions = [
             { id: "1", description: "Einkauf Penny", date: "2025-12-10", quantity: 1, price: -7.93, sum: -7.93 },
             { id: "2", description: "Schoko Riegel Rewe für Adventskalener", date: "2025-11-29", quantity: 1, price: -3.87, sum: -3.87 },
@@ -510,13 +441,13 @@
             { id: "8", description: "Mein Lesepass", date: "2025-09-12", quantity: 1, price: -25.90, sum: -25.90 },
             { id: "9", description: "Kindermuseum München", date: "2025-10-16", quantity: 1, price: -90.00, sum: -90.00 },
             { id: "10", description: "Herma Etiketten", date: "2025-02-21", quantity: 1, price: -11.99, sum: -11.99 },
-            { id: "11", description: "Rossmann (Verbrauchsmaterial: Kosmetiktücher / Spülmittel etc.)", date: "2025-07-18", quantity: null, price: null, sum: -12.44 },
+            { id: "11", description: "Rossmann (Verbrauchsmaterial)", date: "2025-07-18", quantity: null, price: null, sum: -12.44 },
             { id: "12", description: "Wackelaugen selbstklebend", date: "2025-03-23", quantity: null, price: null, sum: -6.99 },
             { id: "13", description: "Papiertüten Osterhasen / Rossmann", date: "2025-03-15", quantity: null, price: null, sum: -5.56 },
             { id: "14", description: "Holzperlen bunt zum Auffädeln", date: "2025-02-12", quantity: null, price: null, sum: -6.99 },
             { id: "15", description: "Aufstockung der Klassenkasse", date: "2025-02-05", quantity: 23, price: 5.00, sum: 115.00 },
-            { id: "16", description: "Adventskalender Pixie Bücher (Sammelbestellung)", date: "2024-12-15", quantity: 22, price: -0.99, sum: -21.78 },
-            { id: "17", description: "Ausflug Marionettentheater (Betreuerkarten)", date: "", quantity: 2, price: -8.00, sum: -16.00 },
+            { id: "16", description: "Adventskalender Pixie Bücher", date: "2024-12-15", quantity: 22, price: -0.99, sum: -21.78 },
+            { id: "17", description: "Ausflug Marionettentheater (Betreuer)", date: "", quantity: 2, price: -8.00, sum: -16.00 },
             { id: "18", description: "Ausflug Marionettentheater", date: "", quantity: 22, price: -1.00, sum: -22.00 },
             { id: "19", description: "Musikalische Aufführung \"Siebenschläfer\"", date: "", quantity: null, price: null, sum: -48.70 },
             { id: "20", description: "Geburtstagsgeschenk Edelsteine", date: "2023-07-17", quantity: null, price: null, sum: -9.32 },
@@ -539,14 +470,8 @@
         function loadFromLocalStorage() {
             const saved = localStorage.getItem('klassenkasse_persistent_v6');
             if (saved) {
-                try {
-                    transactions = JSON.parse(saved);
-                } catch(e) {
-                    transactions = [...defaultTransactions];
-                }
-            } else {
-                transactions = [...defaultTransactions];
-            }
+                try { transactions = JSON.parse(saved); } catch(e) { transactions = [...defaultTransactions]; }
+            } else { transactions = [...defaultTransactions]; }
             updateUI();
         }
 
@@ -557,12 +482,7 @@
 
         function getTimestampString() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${year}${month}${day}_${hours}${minutes}`;
+            return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
         }
 
         function formatEuro(amount) {
@@ -579,26 +499,18 @@
         function updateUI() {
             const listEl = document.getElementById('transaction-list');
             listEl.innerHTML = '';
-
             globalIncome = 0;
             globalExpense = 0;
 
             transactions.sort((a, b) => new Date(b.date || '1970-01-01') - new Date(a.date || '1970-01-01'));
 
             transactions.forEach((tx) => {
-                if (tx.sum > 0) {
-                    globalIncome += tx.sum;
-                } else {
-                    globalExpense += Math.abs(tx.sum);
-                }
+                if (tx.sum > 0) globalIncome += tx.sum;
+                else globalExpense += Math.abs(tx.sum);
 
                 const li = document.createElement('li');
                 li.className = 'transaction-item';
-
-                let detailsText = '';
-                if(tx.quantity && tx.price) {
-                    detailsText = `<span class="tx-details">${tx.quantity} x ${formatEuro(Math.abs(tx.price))}</span>`;
-                }
+                let detailsText = tx.quantity && tx.price ? `<span class="tx-details">${tx.quantity} x ${formatEuro(Math.abs(tx.price))}</span>` : '';
 
                 li.innerHTML = `
                     <div class="tx-info">
@@ -610,15 +522,14 @@
                         ${tx.sum >= 0 ? '+' : ''}${formatEuro(tx.sum)}
                     </div>
                     <div class="action-buttons">
-                        <button class="btn-action btn-edit" onclick="startEdit('${tx.id}')" title="Bearbeiten">✏️</button>
-                        <button class="btn-action btn-delete" onclick="deleteTransaction('${tx.id}')" title="Löschen">🗑️</button>
+                        <button class="btn-action btn-edit" onclick="startEdit('${tx.id}')">✏️</button>
+                        <button class="btn-action btn-delete" onclick="deleteTransaction('${tx.id}')">🗑️</button>
                     </div>
                 `;
                 listEl.appendChild(li);
             });
 
             globalBalance = Math.round((globalIncome - globalExpense) * 100) / 100;
-
             document.getElementById('total-balance').innerText = formatEuro(globalBalance);
             document.getElementById('total-balance').className = 'amount ' + (globalBalance >= 0 ? 'text-success' : 'text-danger');
             document.getElementById('total-income').innerText = formatEuro(globalIncome);
@@ -659,10 +570,9 @@
 
         function deleteTransaction(id) {
             const tx = transactions.find(t => t.id === id);
-            if (confirm(`Möchtest du den Eintrag "${tx.description}" wirklich löschen?`)) {
+            if (confirm(`"${tx.description}" wirklich löschen?`)) {
                 transactions = transactions.filter(t => t.id !== id);
                 if (editId === id) cancelEdit();
-                updateUI();
                 saveToLocalStorage();
             }
         }
@@ -691,14 +601,7 @@
                 }
                 cancelEdit();
             } else {
-                transactions.unshift({
-                    id: Date.now().toString(),
-                    description: description,
-                    date: date,
-                    quantity: quantity,
-                    price: price,
-                    sum: sum
-                });
+                transactions.unshift({ id: Date.now().toString(), description, date, quantity, price, sum });
                 document.getElementById('description').value = '';
                 document.getElementById('quantity').value = '1';
                 document.getElementById('price').value = '';
@@ -709,9 +612,7 @@
         function exportDataHTML() {
             let currentHTML = document.documentElement.outerHTML;
             const regex = /const defaultTransactions = \[\s*[\s\S]*?\s*\];/;
-            const newTransactionsCode = `const defaultTransactions = ${JSON.stringify(transactions, null, 4)};`;
-            currentHTML = currentHTML.replace(regex, newTransactionsCode);
-            
+            currentHTML = currentHTML.replace(regex, `const defaultTransactions = ${JSON.stringify(transactions, null, 4)};`);
             const blob = new Blob(["<!DOCTYPE html>\n" + currentHTML], { type: 'text/html' });
             const a = document.createElement('a');
             a.download = `Klassenkasse_2c_App_Stand_${getTimestampString()}.html`;
@@ -720,8 +621,7 @@
         }
 
         function exportDataJSON() {
-            const dataStr = JSON.stringify(transactions, null, 4);
-            const blob = new Blob([dataStr], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(transactions, null, 4)], { type: 'application/json' });
             const a = document.createElement('a');
             a.download = `Klassenkasse_2c_DatenBackup_${getTimestampString()}.json`;
             a.href = URL.createObjectURL(blob);
@@ -740,8 +640,7 @@
                         transactions.forEach((t, i) => { if(!t.id) t.id = "imp_" + i + "_" + Date.now() });
                         cancelEdit();
                         saveToLocalStorage();
-                        alert('Backup erfolgreich wiederhergestellt und dauerhaft gespeichert!');
-                        event.target.value = '';
+                        alert('Backup erfolgreich geladen!');
                     }
                 } catch (err) { alert('Fehler beim Lesen.'); }
             };
@@ -749,45 +648,16 @@
         }
 
         function exportDataExcel() {
-            if (typeof XLSX === 'undefined') {
-                alert("Bibliothek lädt noch...");
-                return;
-            }
-
-            let wsData = [
-                ["Klassenkasse 2c - Schuljahr 2025/2026"], 
-                [], 
-                ["ÜBERSICHT KASSENSTAND"], 
-                ["Aktueller Saldo:", globalBalance],
-                ["Gesamteinnahmen:", globalIncome],
-                ["Gesamtausgaben:", globalExpense],
-                [], 
-                ["BUCHUNGSLISTE"], 
-                ["Beschreibung", "Datum", "Anzahl", "Einzelpreis (€)", "Summe (€)"] 
-            ];
-
-            transactions.forEach(tx => {
-                wsData.push([
-                    tx.description,
-                    tx.date ? formatDate(tx.date) : "Kein Datum",
-                    tx.quantity || "",
-                    tx.price ? Math.abs(tx.price) : "",
-                    tx.sum
-                ]);
-            });
-
+            if (typeof XLSX === 'undefined') return alert("Bibliothek lädt noch...");
+            let wsData = [["Klassenkasse 2c"], [], ["Saldo:", globalBalance], ["Einnahmen:", globalIncome], ["Ausgaben:", globalExpense], [], ["Beschreibung", "Datum", "Anzahl", "Einzelpreis", "Summe"]];
+            transactions.forEach(tx => wsData.push([tx.description, tx.date ? formatDate(tx.date) : "", tx.quantity || "", tx.price ? Math.abs(tx.price) : "", tx.sum]));
             const worksheet = XLSX.utils.aoa_to_sheet(wsData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Übersicht");
-
-            worksheet['!cols'] = [{ wch: 35 }, { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 15 }];
-
-            XLSX.writeFile(workbook, `Klassenkasse_2c_Export_${getTimestampString().split('_')[0]}.xlsx`);
+            XLSX.writeFile(workbook, `Klassenkasse_2c_${getTimestampString().split('_')[0]}.xlsx`);
         }
 
-        function exportDataPDF() {
-            window.print(); 
-        }
+        function exportDataPDF() { window.print(); }
     </script>
 </body>
 </html>
