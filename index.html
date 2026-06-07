@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klassenkasse 2c - Schuljahr 2025/26 (V6)</title>   
+    <title>Klassenkasse 2c - Schuljahr 2025/26 (V6 - Repariert)</title>   
     <link rel="manifest" href="manifest.json">
-    <!-- Bindet die Excel-Export-Bibliothek ein -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -328,9 +327,6 @@
             text-align: center;
         }
 
-        /* ==========================================================================
-           HINZUGEFÜGT: OPTIMIERTES PRINT-LAYOUT FÜR PDF EXPORT
-           ========================================================================== */
         @media print {
             @page {
                 size: A4 portrait;
@@ -341,7 +337,7 @@
                 background: white !important;
                 color: #000000 !important;
                 padding: 0 !important;
-                -webkit-print-color-adjust: exact; /* Zwingt Browser Farben zu drucken */
+                -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
@@ -353,7 +349,6 @@
                 margin-bottom: 25px !important;
             }
 
-            /* Die 3 Boxen sauber nebeneinander erzwingen */
             .dashboard {
                 display: flex !important;
                 flex-direction: row !important;
@@ -387,12 +382,10 @@
                 font-size: 1.4rem !important;
             }
 
-            /* Verstecke alle App-Bedienelemente */
             .form-container, .backup-container, .action-buttons, .btn-success, .tx-meta + .tx-details::before {
                 display: none !important;
             }
 
-            /* Buchungsliste als saubere Tabelle formatieren */
             .transactions-container {
                 box-shadow: none !important;
                 padding: 0 !important;
@@ -408,7 +401,7 @@
             .transaction-item {
                 border-bottom: 1px solid #cbd5e1 !important;
                 padding: 8px 0 !important;
-                page-break-inside: avoid; /* Verhindert hässliche Seitenumbrüche mitten im Text */
+                page-break-inside: avoid;
             }
 
             .tx-title {
@@ -429,7 +422,6 @@
         <p>Schuljahr 2025/2026 – Mobile Verwaltung</p>
     </header>
 
-    <!-- Dashboard -->
     <div class="dashboard">
         <div class="card balance">
             <h3>Aktueller Bestand</h3>
@@ -445,7 +437,6 @@
         </div>
     </div>
 
-    <!-- Formular -->
     <div class="form-container" id="form-container">
         <h2 id="form-title">Neue Buchung hinzufügen</h2>
         <div class="edit-indicator" id="edit-indicator">⚠️ Du bearbeitest gerade einen Eintrag!</div>
@@ -480,15 +471,12 @@
         </form>
     </div>
 
-    <!-- Transaktionen -->
     <div class="transactions-container">
         <h2>Buchungshistorie (Neueste oben)</h2>
         <ul class="transaction-list" id="transaction-list">
-            <!-- Wird per JavaScript befüllt -->
-        </ul>
+            </ul>
     </div>
 
-    <!-- Datensicherung & Export -->
     <div class="backup-container">
         <h2>Backup & Datensicherung</h2>
         <div class="backup-grid">
@@ -504,8 +492,8 @@
     </div>
 
     <script>
-        // Deine Originaldaten aus der Excel-Tabelle
-        let transactions = [
+        // Deine Originaldaten (dienen nur noch als Fallback, falls im Speicher gar nichts liegt)
+        const defaultTransactions = [
             { id: "1", description: "Einkauf Penny", date: "2025-12-10", quantity: 1, price: -7.93, sum: -7.93 },
             { id: "2", description: "Schoko Riegel Rewe für Adventskalener", date: "2025-11-29", quantity: 1, price: -3.87, sum: -3.87 },
             { id: "3", description: "Keksaustecher Woolworth", date: "2025-11-24", quantity: 1, price: -4.50, sum: -4.50 },
@@ -531,12 +519,49 @@
             { id: "23", description: "Startguthaben", date: "2024-09-22", quantity: 22, price: 4.45, sum: 97.90 }
         ];
 
+        // Daten-Array wird dynamisch befüllt
+        let transactions = [];
+
         let editId = null;
         let globalIncome = 0;
         let globalExpense = 0;
         let globalBalance = 0;
 
-        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        // Beim Laden direkt die persistenten Daten abrufen
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            loadFromLocalStorage();
+        });
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('klassenkasse_persistent_v6');
+            if (saved) {
+                try {
+                    transactions = JSON.parse(saved);
+                } catch(e) {
+                    transactions = [...defaultTransactions];
+                }
+            } else {
+                transactions = [...defaultTransactions];
+            }
+            updateUI();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('klassenkasse_persistent_v6', JSON.stringify(transactions));
+            updateUI();
+        }
+
+        // Generiert den geforderten Zeitstempel (YYYYMMDD_HHMM)
+        function getTimestampString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${year}${month}${day}_${hours}${minutes}`;
+        }
 
         function formatEuro(amount) {
             return amount.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -635,7 +660,7 @@
             if (confirm(`Möchtest du den Eintrag "${tx.description}" wirklich löschen?`)) {
                 transactions = transactions.filter(t => t.id !== id);
                 if (editId === id) cancelEdit();
-                updateUI();
+                saveToLocalStorage();
             }
         }
 
@@ -675,18 +700,19 @@
                 document.getElementById('quantity').value = '1';
                 document.getElementById('price').value = '';
             }
-            updateUI();
+            saveToLocalStorage();
         });
 
         function exportDataHTML() {
             let currentHTML = document.documentElement.outerHTML;
-            const regex = /let transactions = \[\s*[\s\S]*?\s*\];/;
-            const newTransactionsCode = `let transactions = ${JSON.stringify(transactions, null, 4)};`;
+            // Ersetzt das Standard-Fallback-Array im Quelltext des Exports
+            const regex = /const defaultTransactions = \[\s*[\s\S]*?\s*\];/;
+            const newTransactionsCode = `const defaultTransactions = ${JSON.stringify(transactions, null, 4)};`;
             currentHTML = currentHTML.replace(regex, newTransactionsCode);
+            
             const blob = new Blob(["<!DOCTYPE html>\n" + currentHTML], { type: 'text/html' });
             const a = document.createElement('a');
-            const today = new Date().toISOString().split('T')[0];
-            a.download = `Klassenkasse_2c_App_Stand_${today}.html`;
+            a.download = `Klassenkasse_2c_App_Stand_${getTimestampString()}.html`;
             a.href = URL.createObjectURL(blob);
             a.click();
         }
@@ -695,8 +721,7 @@
             const dataStr = JSON.stringify(transactions, null, 4);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const a = document.createElement('a');
-            const today = new Date().toISOString().split('T')[0];
-            a.download = `Klassenkasse_2c_DatenBackup_${today}.json`;
+            a.download = `Klassenkasse_2c_DatenBackup_${getTimestampString()}.json`;
             a.href = URL.createObjectURL(blob);
             a.click();
         }
@@ -712,8 +737,12 @@
                         transactions = importedData;
                         transactions.forEach((t, i) => { if(!t.id) t.id = "imp_" + i + "_" + Date.now() });
                         cancelEdit();
-                        updateUI();
-                        alert('Backup erfolgreich wiederhergestellt!');
+                        
+                        // WICHTIG: Sofort persistent sichern, damit es F5 übersteht!
+                        saveToLocalStorage();
+                        
+                        alert('Backup erfolgreich wiederhergestellt und dauerhaft gespeichert!');
+                        event.target.value = '';
                     }
                 } catch (err) { alert('Fehler beim Lesen.'); }
             };
@@ -754,15 +783,12 @@
 
             worksheet['!cols'] = [{ wch: 35 }, { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 15 }];
 
-            const today = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(workbook, `Klassenkasse_2c_Export_${today}.xlsx`);
+            XLSX.writeFile(workbook, `Klassenkasse_2c_Export_${getTimestampString().split('_')[0]}.xlsx`);
         }
 
         function exportDataPDF() {
             window.print(); 
         }
-
-        updateUI();
     </script>
 </body>
 </html>
