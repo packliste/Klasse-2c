@@ -2,23 +2,19 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <!-- WICHTIG: Erwirkt die korrekte Skalierung auf JEDEM Smartphone -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     
-    <!-- Erzwingt den Vollbild-App-Modus auf iOS (Safari) und Android -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     
     <title>Klassenkasse 2c</title>   
     
-    <!-- Anti-Cache-Befehle -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <!-- DATA-URI MANIFEST: Lädt das Manifest DIREKT aus dem Code, benötigt keine extra Datei mehr! -->
-    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Klassenkasse%202c%22%2C%22short_name%22%3A%22Kasse%202c%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f6f9%22%2C%22theme_color%22%3A%22%234a90e2%22%7D">
+    <link rel="manifest" href="manifest.json">
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
@@ -357,7 +353,6 @@
         <p>Schuljahr 2025/2026 – Mobile Verwaltung</p>
     </header>
 
-    <!-- Dashboard -->
     <div class="dashboard">
         <div class="card balance">
             <h3>Aktueller Bestand</h3>
@@ -373,7 +368,6 @@
         </div>
     </div>
 
-    <!-- Formular -->
     <div class="form-container" id="form-container">
         <h2 id="form-title">Neue Buchung hinzufügen</h2>
         <div class="edit-indicator" id="edit-indicator">⚠️ Du bearbeitest gerade einen Eintrag!</div>
@@ -408,13 +402,11 @@
         </form>
     </div>
 
-    <!-- Transaktionen -->
     <div class="transactions-container">
         <h2>Buchungshistorie</h2>
         <ul class="transaction-list" id="transaction-list"></ul>
     </div>
 
-    <!-- Datensicherung -->
     <div class="backup-container">
         <h2>Backup & Datensicherung</h2>
         <div class="backup-grid">
