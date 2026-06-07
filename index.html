@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klassenkasse 2c - Schuljahr 2025/26 (V6 - Repariert)</title>   
-    <link rel="manifest" href="manifest.json?v=2">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js?v=2"></script>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="manifest" href="manifest.json?v=3">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js?v=3"></script>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -520,15 +525,12 @@
             { id: "23", description: "Startguthaben", date: "2024-09-22", quantity: 22, price: 4.45, sum: 97.90 }
         ];
 
-        // Daten-Array wird dynamisch befüllt
         let transactions = [];
-
         let editId = null;
         let globalIncome = 0;
         let globalExpense = 0;
         let globalBalance = 0;
 
-        // Beim Laden direkt die persistenten Daten abrufen
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('date').value = new Date().toISOString().split('T')[0];
             loadFromLocalStorage();
@@ -553,7 +555,6 @@
             updateUI();
         }
 
-        // Generiert den geforderten Zeitstempel (YYYYMMDD_HHMM)
         function getTimestampString() {
             const now = new Date();
             const year = now.getFullYear();
@@ -707,7 +708,6 @@
 
         function exportDataHTML() {
             let currentHTML = document.documentElement.outerHTML;
-            // Ersetzt das Standard-Fallback-Array im Quelltext des Exports
             const regex = /const defaultTransactions = \[\s*[\s\S]*?\s*\];/;
             const newTransactionsCode = `const defaultTransactions = ${JSON.stringify(transactions, null, 4)};`;
             currentHTML = currentHTML.replace(regex, newTransactionsCode);
@@ -739,10 +739,7 @@
                         transactions = importedData;
                         transactions.forEach((t, i) => { if(!t.id) t.id = "imp_" + i + "_" + Date.now() });
                         cancelEdit();
-                        
-                        // WICHTIG: Sofort persistent sichern, damit es F5 übersteht!
                         saveToLocalStorage();
-                        
                         alert('Backup erfolgreich wiederhergestellt und dauerhaft gespeichert!');
                         event.target.value = '';
                     }
