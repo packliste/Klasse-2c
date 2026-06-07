@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klassenkasse 2c - Schuljahr 2025/26 (V6 - Repariert)</title>   
-    <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="manifest" href="manifest.json?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js?v=2"></script>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -327,6 +327,7 @@
             text-align: center;
         }
 
+        /* PRINT OPTIMIERUNG FÜR DEN PDF-EXPORT */
         @media print {
             @page {
                 size: A4 portrait;
@@ -660,6 +661,7 @@
             if (confirm(`Möchtest du den Eintrag "${tx.description}" wirklich löschen?`)) {
                 transactions = transactions.filter(t => t.id !== id);
                 if (editId === id) cancelEdit();
+                updateUI();
                 saveToLocalStorage();
             }
         }
